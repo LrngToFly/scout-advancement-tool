@@ -1,0 +1,16 @@
+# Local settings (points at the data folder on this Mac)
+config.json
+
+# Scout data and generated reports never belong in the repo
+Data/
+Reports/
+*.csv
+
+# PDF library, installed on first run by "Start Scout Tool.command"
+app/vendor/
+
+# Python / macOS clutter (._* files come from the exFAT drive)
+__pycache__/
+*.pyc
+.DS_Store
+._*

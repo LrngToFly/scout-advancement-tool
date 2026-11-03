@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trail to First Class</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --panel: #fff; --ink: #1d2433; --muted: #6b7385; --line: #e2e5eb;
+    --accent: #1e5aa8; --accent-ink: #fff;
+    --D: #6A4C93; --O: #2E7D32; --S: #D97706; --N: #78909C;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: var(--bg); color: var(--ink); }
+  header { background: #12305a; color: #fff; padding: 14px 24px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 5; }
+  header h1 { font-size: 18px; margin: 0; font-weight: 650; }
+  header .csvinfo { font-size: 12.5px; opacity: .85; }
+  header .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  button { font: inherit; border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: 7px; padding: 6px 12px; cursor: pointer; }
+  button:hover { border-color: #b9c0cc; }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+  button.primary:disabled { opacity: .5; cursor: default; }
+  header button { background: rgba(255,255,255,.12); color: #fff; border-color: rgba(255,255,255,.3); }
+  header button:hover { background: rgba(255,255,255,.22); border-color: rgba(255,255,255,.5); }
+  nav { display: flex; gap: 4px; padding: 0 24px; background: #fff; border-bottom: 1px solid var(--line); position: sticky; top: 58px; z-index: 4; }
+  nav button { border: 0; border-bottom: 3px solid transparent; border-radius: 0; padding: 12px 14px; background: none; color: var(--muted); font-weight: 600; }
+  nav button.on { color: var(--accent); border-bottom-color: var(--accent); }
+  main { max-width: 1100px; margin: 0 auto; padding: 20px 24px 60px; }
+  .tab { display: none; } .tab.on { display: block; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 16px; }
+  .toolbar select, .toolbar input[type=search] { font: inherit; padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; }
+  .toolbar input[type=search] { min-width: 200px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; padding: 3px 9px; border-radius: 99px; background: #eef0f4; color: var(--ink); white-space: nowrap; }
+  .chip .dot { width: 9px; height: 9px; border-radius: 50%; }
+  .spacer { flex: 1; }
+  h2.sec { font-size: 16px; margin: 22px 0 8px; display: flex; align-items: baseline; gap: 10px; }
+  h2.sec small { font-weight: 400; color: var(--muted); font-size: 12.5px; }
+  .req { display: grid; grid-template-columns: 1fr auto; gap: 14px; background: var(--panel); border: 1px solid var(--line); border-left: 5px solid #d5d9e0; border-radius: 9px; padding: 11px 14px; margin-bottom: 8px; }
+  .req[data-cat=D] { border-left-color: var(--D); } .req[data-cat=O] { border-left-color: var(--O); }
+  .req[data-cat=S] { border-left-color: var(--S); } .req[data-cat=N] { border-left-color: var(--N); }
+  .req .rid { font-weight: 700; color: var(--accent); margin-right: 6px; }
+  .req .short { font-weight: 600; }
+  .req .text { white-space: pre-line; color: #33394a; margin-top: 3px; }
+  .req .need { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+  .req .need b { color: #b42318; font-weight: 600; }
+  .req .need .ok { color: #2E7D32; }
+  .req .sugg { font-size: 12px; color: var(--muted); margin-top: 6px; text-align: right; }
+  .seg { display: grid; grid-template-columns: repeat(2, 104px); gap: 5px; align-content: start; }
+  .seg button { font-size: 12.5px; padding: 5px 6px; border-radius: 6px; color: var(--muted); }
+  .seg button.on { color: #fff; font-weight: 600; }
+  .seg button.on[data-c=D] { background: var(--D); border-color: var(--D); }
+  .seg button.on[data-c=O] { background: var(--O); border-color: var(--O); }
+  .seg button.on[data-c=S] { background: var(--S); border-color: var(--S); }
+  .seg button.on[data-c=N] { background: var(--N); border-color: var(--N); }
+  table.grid { border-collapse: collapse; width: 100%; background: #fff; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  table.grid th, table.grid td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; font-size: 13px; }
+  table.grid th { background: #f0f2f6; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; }
+  .st-done { color: #1e5aa8; font-weight: 600; } .st-prog { color: #2E7D32; } .st-none { color: var(--muted); }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; margin-bottom: 16px; }
+  .card h3 { margin: 0 0 10px; font-size: 15px; }
+  .field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+  .field label { font-size: 12.5px; color: var(--muted); font-weight: 600; }
+  .field input[type=text], .field textarea { font: inherit; padding: 7px 9px; border: 1px solid var(--line); border-radius: 7px; width: 100%; }
+  .field textarea { min-height: 44px; resize: vertical; }
+  .checks label { display: flex; gap: 8px; align-items: baseline; padding: 4px 0; }
+  .checks .sub { color: var(--muted); font-size: 12.5px; }
+  .legend-row { display: grid; grid-template-columns: 90px 1fr; gap: 10px; align-items: start; margin-bottom: 8px; }
+  .pill { display: inline-block; color: #fff; font-weight: 700; font-size: 11.5px; border-radius: 5px; padding: 3px 0; width: 80px; text-align: center; }
+  .warn { background: #fff7e6; border: 1px solid #f3d38a; color: #7a4b00; border-radius: 8px; padding: 9px 12px; margin-bottom: 12px; font-size: 13px; }
+  .err { background: #fdecec; border: 1px solid #f2b8b5; color: #8a1c1c; border-radius: 8px; padding: 9px 12px; margin-bottom: 12px; }
+  .okbox { background: #eaf6ec; border: 1px solid #b7dfbf; color: #1f5a2a; border-radius: 8px; padding: 12px 14px; }
+  .okbox ul { margin: 6px 0 10px; padding-left: 20px; }
+  .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .muted { color: var(--muted); }
+  #toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: #1d2433; color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  #toast.show { opacity: .95; }
+  @media (max-width: 700px) { .req { grid-template-columns: 1fr; } .seg { grid-template-columns: repeat(4, 1fr); } nav { top: 0; position: static; } header { position: static; } }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Trail to First Class: Advancement Planner</h1>
+    <div class="csvinfo" id="csvinfo">No report loaded</div>
+  </div>
+  <div class="actions">
+    <button id="loadBtn">Load CSV…</button>
+    <input type="file" id="fileIn" accept=".csv,text/csv" hidden>
+    <button id="openReportsBtn">Open Reports Folder</button>
+    <button id="quitBtn">Quit</button>
+  </div>
+</header>
+<nav>
+  <button data-tab="reqs" class="on">1 · Categorize Requirements</button>
+  <button data-tab="scouts">2 · Scout Progress</button>
+  <button data-tab="reports">3 · Generate PDFs</button>
+</nav>
+<main>
+  <div id="globalErr"></div>
+
+  <section class="tab on" id="tab-reqs">
+    <div class="toolbar">
+      <select id="fCat">
+        <option value="all">All requirements</option>
+        <option value="none">Uncategorized only</option>
+        <option value="D">Discuss only</option>
+        <option value="O">Outdoor only</option>
+        <option value="S">On Own only</option>
+        <option value="N">N/A only</option>
+      </select>
+      <label><input type="checkbox" id="fNeeded"> Only ones a scout still needs</label>
+      <input type="search" id="fSearch" placeholder="Search wording…">
+      <span class="spacer"></span>
+      <span id="catCounts"></span>
+    </div>
+    <div class="toolbar" style="font-size:13px">
+      <span class="muted">Click a category to set it; click it again to clear it. Changes save automatically.</span>
+      <span class="spacer"></span>
+      <button id="suggestBtn">Fill uncategorized with suggestions</button>
+    </div>
+    <div id="reqList"></div>
+  </section>
+
+  <section class="tab" id="tab-scouts">
+    <div id="scoutTable"></div>
+    <p class="muted" style="font-size:12.5px">A rank counts as finished when the report shows it as <b>Approved</b> or <b>Awarded</b>. A rank left out of the CSV (e.g. Scout) is assumed finished when a later rank is in the CSV. "Open items" counts what's left from the rank the scout is working on through First Class, plus any chit not yet earned.</p>
+  </section>
+
+  <section class="tab" id="tab-reports">
+    <div id="repWarn"></div>
+    <div class="card">
+      <h3>Report</h3>
+      <div class="field"><label for="title">Report title (printed at the top of every PDF)</label><input type="text" id="title"></div>
+      <div class="checks" id="scoutChecks"></div>
+      <div style="margin:6px 0 10px"><button id="selAll">Select all</button> <button id="selNone">Select none</button></div>
+      <div class="checks">
+        <label><input type="checkbox" id="optAll" checked> <span>All-scouts PDF <span class="sub">(one grid with every selected scout, like the advancements.scouting.org report)</span></span></label>
+        <label><input type="checkbox" id="optInd" checked> <span>A separate PDF for each scout <span class="sub">(to email to the scout and parents)</span></span></label>
+        <label><input type="checkbox" id="optHide"> <span>In each scout's PDF, list only requirements still needed <span class="sub">(otherwise finished ones show a check)</span></span></label>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Legend wording printed on the PDFs</h3>
+      <div id="legendEdit"></div>
+    </div>
+    <button class="primary" id="genBtn">Generate PDFs</button>
+    <div id="genResult" style="margin-top:14px"></div>
+  </section>
+</main>
+<div id="toast"></div>
+
+<script>
+const CATS = [["D","Discuss"],["O","Outdoor"],["S","On Own"],["N","N/A"]];
+const CATNAME = Object.fromEntries(CATS);
+const RANKS = ["S","TF","2C","1C"], CHITS = ["TOTIN","FIREMN"];
+let S = null;
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const needed = st => st !== "done" && st !== "rankdone";
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), 1600); }
+function showErr(msg) { $("#globalErr").innerHTML = msg ? `<div class="err">${esc(msg)}</div>` : ""; }
+
+async function api(path, body) {
+  const r = await fetch(path, body === undefined ? {} : { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body) });
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error || "Something went wrong");
+  return j;
+}
+
+async function load() {
+  try { S = await api("/api/state"); showErr(""); }
+  catch (e) { showErr("Couldn't read the saved CSV: " + e.message + ". Load a new CSV file."); return; }
+  render();
+}
+
+function render() {
+  const c = S.csv;
+  $("#csvinfo").textContent = c ? `Loaded: ${c.filename} · ${c.scouts.length} scouts · loaded ${c.loaded_at}` : "No report loaded. Click Load CSV…";
+  renderReqs(); renderScouts(); renderReports();
+}
+
+// Scouts still needing a requirement key
+function needers(key) {
+  if (!S.csv) return null;
+  return S.csv.scouts.filter(s => needed(s.reqs[key])).map(s => s.name);
+}
+
+function renderReqs() {
+  const cats = S.settings.categories, fCat = $("#fCat").value, fNeed = $("#fNeeded").checked;
+  const q = $("#fSearch").value.trim().toLowerCase();
+  const counts = {D:0,O:0,S:0,N:0,none:0};
+  let html = "";
+  for (const sec of S.sections) {
+    let rows = "";
+    for (const r of sec.reqs) {
+      const key = `${sec.code}-${r.id}`, cat = cats[key] || "";
+      counts[cat || "none"]++;
+      if (fCat === "none" && cat) continue;
+      if (fCat !== "all" && fCat !== "none" && cat !== fCat) continue;
+      const who = needers(key);
+      if (fNeed && who && !who.length) continue;
+      if (q && !(r.text + " " + r.short).toLowerCase().includes(q)) continue;
+      const label = sec.kind === "chit" ? "" : `<span class="rid">Req ${esc(r.id)}</span>`;
+      const needHtml = who === null ? "" : who.length
+        ? `<div class="need">Still needed by <b>${who.length}</b>: ${who.map(esc).join(", ")}</div>`
+        : `<div class="need"><span class="ok">✓ Everyone in this report has this</span></div>`;
+      rows += `<div class="req" data-cat="${cat}">
+        <div>${label}<span class="short">${esc(r.short)}</span>
+          <div class="text">${esc(r.text)}</div>${needHtml}</div>
+        <div><div class="seg">${CATS.map(([c,n]) => `<button data-key="${key}" data-c="${c}" class="${cat===c?"on":""}">${n}</button>`).join("")}</div>
+          ${cat ? "" : `<div class="sugg">Suggested: ${CATNAME[r.suggest]}</div>`}</div>
+      </div>`;
+    }
+    if (rows) html += `<h2 class="sec">${esc(sec.name)}${sec.kind === "chit" ? " <small>Tracked as a whole; the CSV only shows whether it's earned.</small>" : ""}</h2>${rows}`;
+  }
+  $("#reqList").innerHTML = html || `<div class="empty">No requirements match these filters.</div>`;
+  $("#catCounts").innerHTML = CATS.map(([c,n]) => `<span class="chip"><span class="dot" style="background:var(--${c})"></span>${n} ${counts[c]}</span>`).join(" ")
+    + ` <span class="chip">Uncategorized ${counts.none}</span>`;
+}
+
+async function setCats(changes) {
+  Object.entries(changes).forEach(([k,v]) => v ? S.settings.categories[k] = v : delete S.settings.categories[k]);
+  render();
+  try { await api("/api/settings", {categories: changes}); toast("Saved"); }
+  catch (e) { showErr("Couldn't save: " + e.message); }
+}
+
+$("#reqList").addEventListener("click", e => {
+  const b = e.target.closest("button[data-key]"); if (!b) return;
+  const key = b.dataset.key, cur = S.settings.categories[key] || "";
+  setCats({[key]: cur === b.dataset.c ? "" : b.dataset.c});
+});
+["#fCat","#fNeeded"].forEach(s => $(s).addEventListener("change", renderReqs));
+$("#fSearch").addEventListener("input", renderReqs);
+$("#suggestBtn").addEventListener("click", () => {
+  const ch = {};
+  for (const [k,v] of Object.entries(S.suggestions)) if (!S.settings.categories[k]) ch[k] = v;
+  const n = Object.keys(ch).length;
+  if (!n) return toast("Nothing uncategorized");
+  if (confirm(`Fill ${n} uncategorized requirement(s) with the suggested category? Ones you've already set won't change.`)) setCats(ch);
+});
+
+function rankCell(r) {
+  const cls = r.done ? "st-done" : /progress|started|completed/i.test(r.status) ? "st-prog" : "st-none";
+  return `<td class="${cls}">${r.done ? "✓ " : ""}${esc(r.status)}</td>`;
+}
+function openCounts(s) {
+  const cats = S.settings.categories, n = {D:0,O:0,S:0,N:0,none:0};
+  for (const sec of S.sections) {
+    if (sec.kind === "rank" && RANKS.indexOf(sec.code) < s.start) continue;
+    for (const r of sec.reqs) { const k = `${sec.code}-${r.id}`; if (needed(s.reqs[k])) n[cats[k] || "none"]++; }
+  }
+  return n;
+}
+function renderScouts() {
+  if (!S.csv) { $("#scoutTable").innerHTML = `<div class="empty">Load a CSV to see scout progress.</div>`; return; }
+  const names = {S:"Scout",TF:"Tenderfoot","2C":"Second Class","1C":"First Class",TOTIN:"Totin' Chip",FIREMN:"Firem'n Chit"};
+  let h = `<table class="grid"><tr><th>Scout</th>${[...RANKS,...CHITS].map(c => `<th>${names[c]}</th>`).join("")}<th>Working on</th><th>Open items</th></tr>`;
+  for (const s of S.csv.scouts) {
+    const n = openCounts(s);
+    const oc = CATS.filter(([c]) => n[c]).map(([c,nm]) => `<span class="chip" style="margin:1px"><span class="dot" style="background:var(--${c})"></span>${nm} ${n[c]}</span>`).join(" ")
+      + (n.none ? ` <span class="chip">Uncat. ${n.none}</span>` : "");
+    h += `<tr><td><b>${esc(s.name)}</b></td>${[...RANKS,...CHITS].map(c => rankCell(s.ranks[c])).join("")}<td>${s.start_name ? esc(s.start_name) : "First Class done"}</td><td>${oc || "None"}</td></tr>`;
+  }
+  $("#scoutTable").innerHTML = h + "</table>";
+}
+
+function renderReports() {
+  const st = S.settings;
+  if (document.activeElement !== $("#title")) $("#title").value = st.title || "";
+  $("#optHide").checked = !!st.hide_done_individual;
+  if (!S.csv) { $("#scoutChecks").innerHTML = `<p class="muted">Load a CSV first.</p>`; $("#genBtn").disabled = true; }
+  else {
+    const prev = new Set([...document.querySelectorAll("#scoutChecks input:checked")].map(i => i.value));
+    const first = !document.querySelector("#scoutChecks input");
+    $("#scoutChecks").innerHTML = S.csv.scouts.map(s => `<label><input type="checkbox" value="${esc(s.name)}" ${first || prev.has(s.name) ? "checked" : ""}>
+      <span>${esc(s.name)} <span class="sub">${s.start_name ? "starts at " + esc(s.start_name) : "First Class done (chits only)"}</span></span></label>`).join("");
+    $("#genBtn").disabled = false;
+  }
+  // Warn about uncategorized items someone still needs
+  let unc = 0;
+  if (S.csv) for (const sec of S.sections) for (const r of sec.reqs) {
+    const k = `${sec.code}-${r.id}`;
+    if (!st.categories[k] && S.csv.scouts.some(s => needed(s.reqs[k]) && (sec.kind === "chit" || RANKS.indexOf(sec.code) >= s.start))) unc++;
+  }
+  $("#repWarn").innerHTML = unc ? `<div class="warn">${unc} requirement(s) still needed by a scout have no category yet. They'll print with a blank “?” type. Set them in tab 1.</div>` : "";
+  if (!$("#legendEdit").dataset.built) {
+    $("#legendEdit").innerHTML = CATS.map(([c,n]) => `<div class="legend-row"><span class="pill" style="background:var(--${c})">${n}</span><textarea data-c="${c}"></textarea></div>`).join("");
+    $("#legendEdit").dataset.built = 1;
+    $("#legendEdit").addEventListener("change", async e => {
+      const t = e.target.closest("textarea"); if (!t) return;
+      S.settings.legend[t.dataset.c] = t.value;
+      await api("/api/settings", {legend: {[t.dataset.c]: t.value}}); toast("Saved");
+    });
+  }
+  document.querySelectorAll("#legendEdit textarea").forEach(t => { if (document.activeElement !== t) t.value = st.legend[t.dataset.c] || ""; });
+}
+
+$("#title").addEventListener("change", async () => { S.settings.title = $("#title").value; await api("/api/settings", {title: S.settings.title}); toast("Saved"); });
+$("#optHide").addEventListener("change", async () => { S.settings.hide_done_individual = $("#optHide").checked; await api("/api/settings", {hide_done_individual: S.settings.hide_done_individual}); });
+$("#selAll").addEventListener("click", () => document.querySelectorAll("#scoutChecks input").forEach(i => i.checked = true));
+$("#selNone").addEventListener("click", () => document.querySelectorAll("#scoutChecks input").forEach(i => i.checked = false));
+
+$("#genBtn").addEventListener("click", async () => {
+  const scouts = [...document.querySelectorAll("#scoutChecks input:checked")].map(i => i.value);
+  const box = $("#genResult");
+  if (!scouts.length) { box.innerHTML = `<div class="err">Pick at least one scout.</div>`; return; }
+  if (!$("#optAll").checked && !$("#optInd").checked) { box.innerHTML = `<div class="err">Choose at least one kind of PDF.</div>`; return; }
+  $("#genBtn").disabled = true; box.innerHTML = `<p class="muted">Generating…</p>`;
+  try {
+    const r = await api("/api/generate", { scouts, title: $("#title").value, all: $("#optAll").checked, individual: $("#optInd").checked, hide_done: $("#optHide").checked });
+    box.innerHTML = `<div class="okbox"><b>Done!</b> Saved ${r.files.length} PDF(s) in <b>Reports/${esc(r.folder_name)}</b> (it should have opened in Finder):
+      <ul>${r.files.map(f => `<li>${esc(f)}</li>`).join("")}</ul><button id="openGen">Show in Finder</button></div>`;
+    $("#openGen").onclick = () => api("/api/open-reports", {folder: r.folder});
+  } catch (e) { box.innerHTML = `<div class="err">${esc(e.message)}</div>`; }
+  $("#genBtn").disabled = false;
+});
+
+document.querySelectorAll("nav button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x === b));
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", t.id === "tab-" + b.dataset.tab));
+}));
+
+$("#loadBtn").addEventListener("click", () => $("#fileIn").click());
+$("#fileIn").addEventListener("change", async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try { S = await api("/api/upload", { filename: f.name, text: await f.text() }); showErr(""); render(); toast("Loaded " + f.name); }
+  catch (err) { showErr("Couldn't load that file: " + err.message); }
+  e.target.value = "";
+});
+$("#openReportsBtn").addEventListener("click", () => api("/api/open-reports", {}));
+$("#quitBtn").addEventListener("click", async () => {
+  if (!confirm("Quit the Scout Advancement Tool?")) return;
+  try { await api("/api/quit", {}); } catch (e) {}
+  document.body.innerHTML = `<div class="empty"><h2>The tool has stopped.</h2><p>You can close this browser tab. Double-click “Start Scout Tool” to open it again.</p></div>`;
+});
+
+load();
+</script>
+</body>
+</html>
