@@ -26,6 +26,17 @@ A small Mac app for planning Scouts BSA advancement from Scout rank through Firs
 
 macOS's built-in Python 3 (from the Command Line Developer Tools) is all you need.
 
+### Launchpad / Spotlight app (optional)
+
+Run `tools/install_app.sh` once to build **Scout Advancement Tool.app** in `~/Applications`. After that the tool shows up in Launchpad and Spotlight.
+
+- The app runs in the background with no Terminal window. Click **Quit** in the browser page to stop it.
+- It's only a launcher. It runs the code in this repo, so re-run the script only if the repo moves.
+- The first time it opens, macOS asks to let it access the drive the repo is on. Click **Allow**.
+- Problems are logged to `~/Library/Logs/Scout Advancement Tool.log`.
+
+It uses a small compiled launcher (`tools/launcher.c`) rather than a shell script, so that macOS asks for drive access on behalf of the app instead of silently refusing.
+
 ## Where your data lives
 
 Scout data and reports are kept **outside this repo**. The location is set in `config.json`, which git ignores:
@@ -59,3 +70,5 @@ Requirement text comes from the official Scouts BSA rank requirements (effective
 | `app/advancement.py` | CSV parsing and progress logic |
 | `app/pdf_report.py` | PDF generation |
 | `app/requirements.json` | Requirement wording, short labels, suggested categories |
+| `tools/install_app.sh` | Builds the Launchpad app in `~/Applications` |
+| `tools/launcher.c`, `tools/make_icon.swift` | The app's launcher and icon |
