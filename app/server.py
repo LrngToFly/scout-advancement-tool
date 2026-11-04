@@ -44,6 +44,7 @@ DEFAULT_SETTINGS = {
     "legend": {
         "D": "Discussion item. We cover it together at an indoor meeting (library session).",
         "O": "Outdoor item. Done during a hike, campout, or other outdoor activity.",
+        "C": "Coordinated. The scout and an adult leader plan ahead to make it happen (for example, serving as patrol cook on a campout).",
         "S": "On your own. Work on it at home, then show or discuss it with an Assistant Scoutmaster.",
         "N": "N/A for meetings. Completed through regular troop activities (outings, service, Scoutmaster conference, board of review).",
     },
@@ -125,6 +126,10 @@ def generate(body):
     if body.get("all", True):
         p = folder / f"All Scouts - {safe_name(title)}.pdf"
         pdf_report.all_scouts_pdf(p, scouts, **opts)
+        files.append(p.name)
+    if body.get("by_category", True):
+        p = folder / f"Remaining by Type - {safe_name(title)}.pdf"
+        pdf_report.by_category_pdf(p, scouts, **opts)
         files.append(p.name)
     if body.get("individual", True):
         for s in scouts:

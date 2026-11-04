@@ -7,7 +7,7 @@ from pathlib import Path
 
 RANKS = ["S", "TF", "2C", "1C"]
 CHITS = ["TOTIN", "FIREMN"]
-CATEGORIES = ["D", "O", "S", "N"]
+CATEGORIES = ["D", "O", "C", "S", "N"]
 DONE = {"approved", "awarded"}
 # Higher in this list wins when a rank has several status rows (e.g. "Tenderfoot" and "Tenderfoot v2022").
 STATUS_ORDER = ["awarded", "approved", "completed", "in progress", "started", "not started", ""]

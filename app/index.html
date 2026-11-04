@@ -8,7 +8,7 @@
   :root {
     --bg: #f5f6f8; --panel: #fff; --ink: #1d2433; --muted: #6b7385; --line: #e2e5eb;
     --accent: #1e5aa8; --accent-ink: #fff;
-    --D: #6A4C93; --O: #2E7D32; --S: #D97706; --N: #78909C;
+    --D: #6A4C93; --O: #2E7D32; --C: #0277BD; --S: #D97706; --N: #78909C;
   }
   * { box-sizing: border-box; }
   body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: var(--bg); color: var(--ink); }
@@ -50,6 +50,7 @@
   .seg button.on { color: #fff; font-weight: 600; }
   .seg button.on[data-c=D] { background: var(--D); border-color: var(--D); }
   .seg button.on[data-c=O] { background: var(--O); border-color: var(--O); }
+  .seg button.on[data-c=C] { background: var(--C); border-color: var(--C); }
   .seg button.on[data-c=S] { background: var(--S); border-color: var(--S); }
   .seg button.on[data-c=N] { background: var(--N); border-color: var(--N); }
   table.grid { border-collapse: collapse; width: 100%; background: #fff; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
@@ -64,8 +65,8 @@
   .field textarea { min-height: 44px; resize: vertical; }
   .checks label { display: flex; gap: 8px; align-items: baseline; padding: 4px 0; }
   .checks .sub { color: var(--muted); font-size: 12.5px; }
-  .legend-row { display: grid; grid-template-columns: 90px 1fr; gap: 10px; align-items: start; margin-bottom: 8px; }
-  .pill { display: inline-block; color: #fff; font-weight: 700; font-size: 11.5px; border-radius: 5px; padding: 3px 0; width: 80px; text-align: center; }
+  .legend-row { display: grid; grid-template-columns: 100px 1fr; gap: 10px; align-items: start; margin-bottom: 8px; }
+  .pill { display: inline-block; color: #fff; font-weight: 700; font-size: 11.5px; border-radius: 5px; padding: 3px 0; width: 92px; text-align: center; }
   .warn { background: #fff7e6; border: 1px solid #f3d38a; color: #7a4b00; border-radius: 8px; padding: 9px 12px; margin-bottom: 12px; font-size: 13px; }
   .err { background: #fdecec; border: 1px solid #f2b8b5; color: #8a1c1c; border-radius: 8px; padding: 9px 12px; margin-bottom: 12px; }
   .okbox { background: #eaf6ec; border: 1px solid #b7dfbf; color: #1f5a2a; border-radius: 8px; padding: 12px 14px; }
@@ -74,7 +75,7 @@
   .muted { color: var(--muted); }
   #toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: #1d2433; color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity .2s; pointer-events: none; }
   #toast.show { opacity: .95; }
-  @media (max-width: 700px) { .req { grid-template-columns: 1fr; } .seg { grid-template-columns: repeat(4, 1fr); } nav { top: 0; position: static; } header { position: static; } }
+  @media (max-width: 700px) { .req { grid-template-columns: 1fr; } .seg { grid-template-columns: repeat(5, 1fr); } nav { top: 0; position: static; } header { position: static; } }
 </style>
 </head>
 <body>
@@ -105,6 +106,7 @@
         <option value="none">Uncategorized only</option>
         <option value="D">Discuss only</option>
         <option value="O">Outdoor only</option>
+        <option value="C">Coordinated only</option>
         <option value="S">On Own only</option>
         <option value="N">N/A only</option>
       </select>
@@ -135,6 +137,7 @@
       <div style="margin:6px 0 10px"><button id="selAll">Select all</button> <button id="selNone">Select none</button></div>
       <div class="checks">
         <label><input type="checkbox" id="optAll" checked> <span>All-scouts PDF <span class="sub">(one grid with every selected scout, like the advancements.scouting.org report)</span></span></label>
+        <label><input type="checkbox" id="optCat" checked> <span>Remaining-by-type PDF <span class="sub">(every requirement a selected scout still needs, grouped into Discuss, Outdoor, Coordinated, On Own and N/A)</span></span></label>
         <label><input type="checkbox" id="optInd" checked> <span>A separate PDF for each scout <span class="sub">(to email to the scout and parents)</span></span></label>
         <label><input type="checkbox" id="optHide"> <span>In each scout's PDF, list only requirements still needed <span class="sub">(otherwise finished ones show a check)</span></span></label>
       </div>
@@ -150,7 +153,7 @@
 <div id="toast"></div>
 
 <script>
-const CATS = [["D","Discuss"],["O","Outdoor"],["S","On Own"],["N","N/A"]];
+const CATS = [["D","Discuss"],["O","Outdoor"],["C","Coordinated"],["S","On Own"],["N","N/A"]];
 const CATNAME = Object.fromEntries(CATS);
 const RANKS = ["S","TF","2C","1C"], CHITS = ["TOTIN","FIREMN"];
 let S = null;
@@ -189,7 +192,7 @@ function needers(key) {
 function renderReqs() {
   const cats = S.settings.categories, fCat = $("#fCat").value, fNeed = $("#fNeeded").checked;
   const q = $("#fSearch").value.trim().toLowerCase();
-  const counts = {D:0,O:0,S:0,N:0,none:0};
+  const counts = {D:0,O:0,C:0,S:0,N:0,none:0};
   let html = "";
   for (const sec of S.sections) {
     let rows = "";
@@ -246,7 +249,7 @@ function rankCell(r) {
   return `<td class="${cls}">${r.done ? "✓ " : ""}${esc(r.status)}</td>`;
 }
 function openCounts(s) {
-  const cats = S.settings.categories, n = {D:0,O:0,S:0,N:0,none:0};
+  const cats = S.settings.categories, n = {D:0,O:0,C:0,S:0,N:0,none:0};
   for (const sec of S.sections) {
     if (sec.kind === "rank" && RANKS.indexOf(sec.code) < s.start) continue;
     for (const r of sec.reqs) { const k = `${sec.code}-${r.id}`; if (needed(s.reqs[k])) n[cats[k] || "none"]++; }
@@ -306,10 +309,10 @@ $("#genBtn").addEventListener("click", async () => {
   const scouts = [...document.querySelectorAll("#scoutChecks input:checked")].map(i => i.value);
   const box = $("#genResult");
   if (!scouts.length) { box.innerHTML = `<div class="err">Pick at least one scout.</div>`; return; }
-  if (!$("#optAll").checked && !$("#optInd").checked) { box.innerHTML = `<div class="err">Choose at least one kind of PDF.</div>`; return; }
+  if (!$("#optAll").checked && !$("#optCat").checked && !$("#optInd").checked) { box.innerHTML = `<div class="err">Choose at least one kind of PDF.</div>`; return; }
   $("#genBtn").disabled = true; box.innerHTML = `<p class="muted">Generating…</p>`;
   try {
-    const r = await api("/api/generate", { scouts, title: $("#title").value, all: $("#optAll").checked, individual: $("#optInd").checked, hide_done: $("#optHide").checked });
+    const r = await api("/api/generate", { scouts, title: $("#title").value, all: $("#optAll").checked, by_category: $("#optCat").checked, individual: $("#optInd").checked, hide_done: $("#optHide").checked });
     box.innerHTML = `<div class="okbox"><b>Done!</b> Saved ${r.files.length} PDF(s) in <b>Reports/${esc(r.folder_name)}</b> (it should have opened in Finder):
       <ul>${r.files.map(f => `<li>${esc(f)}</li>`).join("")}</ul><button id="openGen">Show in Finder</button></div>`;
     $("#openGen").onclick = () => api("/api/open-reports", {folder: r.folder});

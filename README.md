@@ -7,6 +7,7 @@ A small Mac app for planning Scouts BSA advancement from Scout rank through Firs
 - **Categorize requirements.** Shows the full official wording of every requirement. You tag each one as:
   - **Discuss**: covered together at an indoor meeting (library session)
   - **Outdoor**: done during a hike, campout, or other outdoor activity
+  - **Coordinated**: the scout and an adult leader plan ahead to make it happen (for example, serving as patrol cook on a campout)
   - **On Own**: the scout works on it at home, then shows or discusses it with an ASM
   - **N/A**: happens through the regular troop program (outings, service, Scoutmaster conference, board of review)
 
@@ -14,6 +15,7 @@ A small Mac app for planning Scouts BSA advancement from Scout rank through Firs
 - **Scout progress.** Shows each scout's rank and chit status and how many items they have left in each category.
 - **PDF reports.** Each run creates a folder named with the date and time (for example, `Reports/2026-11-03 16-44-31/`) containing:
   - one all-scouts grid, styled after the advancements.scouting.org report
+  - a "remaining by type" grid: every requirement at least one scout still needs, grouped into Discuss, Outdoor, Coordinated, On Own, and N/A
   - one PDF per scout, to email to the scout and parents
 
   Each report starts at the scout's first unfinished rank. The PDFs show short requirement labels plus a legend; the full wording appears only in the app.
