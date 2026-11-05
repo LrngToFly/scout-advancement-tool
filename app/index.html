@@ -336,7 +336,7 @@ $("#openReportsBtn").addEventListener("click", () => api("/api/open-reports", {}
 $("#quitBtn").addEventListener("click", async () => {
   if (!confirm("Quit the Scout Advancement Tool?")) return;
   try { await api("/api/quit", {}); } catch (e) {}
-  document.body.innerHTML = `<div class="empty"><h2>The tool has stopped.</h2><p>You can close this browser tab. Double-click “Start Scout Tool” to open it again.</p></div>`;
+  document.body.innerHTML = `<div class="empty"><h2>The tool has stopped.</h2><p>You can close this browser tab. Open the Scout Advancement Tool again to use it.</p></div>`;
 });
 
 load();

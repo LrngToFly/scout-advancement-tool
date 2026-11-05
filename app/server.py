@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Scout Advancement Tool -- a small local web app (runs only on this Mac, at 127.0.0.1)."""
 import json
+import os
 import re
 import subprocess
 import sys
@@ -12,17 +13,37 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 APP = Path(__file__).resolve().parent
-ROOT = APP.parent
+FROZEN = getattr(sys, "frozen", False)  # running as the packaged Windows .exe
+ROOT = Path(sys.executable).parent if FROZEN else APP.parent
 CONFIG_FILE = ROOT / "config.json"  # local only (gitignored); see config.example.json
 
 
+def documents_dir():
+    if sys.platform == "win32":  # the real Documents folder, even when OneDrive has moved it
+        import ctypes
+        buf = ctypes.create_unicode_buffer(260)
+        if ctypes.windll.shell32.SHGetFolderPathW(None, 5, None, 0, buf) == 0:  # 5 = CSIDL_PERSONAL
+            return Path(buf.value)
+    return Path.home() / "Documents"
+
+
 def data_root():
-    """Where the CSV, settings and Reports live: config.json "data_dir", else ~/Documents/Scout Advancement Data."""
+    """Where the CSV, settings and Reports live: config.json "data_dir", else Documents/Scout Advancement Data."""
+    if os.environ.get("SCOUT_TOOL_DATA"):  # used by tools/smoke_test.py
+        return Path(os.environ["SCOUT_TOOL_DATA"])
     if CONFIG_FILE.exists():
         d = json.loads(CONFIG_FILE.read_text(encoding="utf-8")).get("data_dir", "").strip()
         if d:
             return Path(d).expanduser()
-    return Path.home() / "Documents" / "Scout Advancement Data"
+    return documents_dir() / "Scout Advancement Data"
+
+
+def reveal(folder):
+    """Show a folder in Finder / File Explorer."""
+    if sys.platform == "win32":
+        os.startfile(str(folder))
+    else:
+        subprocess.run(["open" if sys.platform == "darwin" else "xdg-open", str(folder)], check=False)
 
 
 DATA_ROOT = data_root()
@@ -31,7 +52,7 @@ REPORTS = DATA_ROOT / "Reports"
 SETTINGS_FILE = DATA / "settings.json"
 CSV_FILE = DATA / "current.csv"
 CSV_META = DATA / "current_meta.json"
-PORT = 8765
+PORT = int(os.environ.get("SCOUT_TOOL_PORT", 8765))
 
 sys.path.insert(0, str(APP / "vendor"))  # reportlab is installed here by the launcher
 sys.path.insert(0, str(APP))
@@ -138,7 +159,8 @@ def generate(body):
             p = folder / f"{safe_name(s['name'])} - Trail to First Class.pdf"
             pdf_report.scout_pdf(p, s, hide_done=bool(body.get("hide_done")), **opts)
             files.append(p.name)
-    subprocess.run(["open", str(folder)], check=False)
+    if body.get("reveal", True):
+        reveal(folder)
     return {"folder": str(folder), "folder_name": folder.name, "files": files}
 
 
@@ -206,7 +228,7 @@ class Handler(BaseHTTPRequestHandler):
                 self._send(200, generate(body))
             elif self.path == "/api/open-reports":
                 REPORTS.mkdir(parents=True, exist_ok=True)
-                subprocess.run(["open", str(body.get("folder") or REPORTS)], check=False)
+                reveal(body.get("folder") or REPORTS)
                 self._send(200, {"ok": True})
             elif self.path == "/api/quit":
                 self._send(200, {"ok": True})

@@ -15,5 +15,7 @@ __pycache__/
 .DS_Store
 ._*
 
-# Release builds (tools/build_release.sh)
+# Release builds (tools/build_release.sh) and Windows build output (PyInstaller)
+build/
 dist/
+*.spec
