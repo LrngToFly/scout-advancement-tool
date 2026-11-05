@@ -77,4 +77,4 @@ Stop a running server with the app's **Quit** button or `curl -X POST http://127
 
 ## Project tracking
 
-The owner (GitHub `LrngToFly`) tracks personal work in Jira project **KAN** ("Personal Projects") at alindeman51.atlassian.net.
+Bug reports and feature requests for this app are tracked in the Jira space **SAT** ("Scout Advancement Tool") at https://alindeman51.atlassian.net/jira/software/projects/SAT/boards. It uses the work types **Bug** and **Feature** (plus Task for chores), and its releases match the GitHub release versions (for example `1.0.0`). Set a ticket's fix version to the release that ships it. When a GitHub release goes out, add the next version in Jira. The owner's other personal work is in the Jira space **KAN** ("Personal Projects") on the same site.

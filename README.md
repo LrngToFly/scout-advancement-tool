@@ -102,6 +102,10 @@ To keep data somewhere other than Documents, put a `config.json` next to the too
 
 git ignores `config.json`. The downloadable Mac app always uses `~/Documents/Scout Advancement Data`.
 
+### Bugs and feature requests
+
+Bugs and ideas for improvements are tracked in the Jira space **SAT** ([Scout Advancement Tool board](https://alindeman51.atlassian.net/jira/software/projects/SAT/boards)). Use the **Bug** work type for something that's broken and **Feature** for an improvement or new idea. Each Jira release matches a GitHub release, such as `1.0.0`.
+
 ### Making a release
 
 Create and publish a release on GitHub's **Releases** page, with a tag like `v1.2.0`. Two GitHub Actions workflows then build the downloads from that version of the code, test each one end to end with made-up scouts (`tools/smoke_test.py`), and attach them to the release a few minutes later:
