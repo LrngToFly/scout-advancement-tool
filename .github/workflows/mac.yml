@@ -41,11 +41,16 @@ jobs:
           trap 'hdiutil detach "$mnt" -force' EXIT
           app="$mnt/Scout Advancement Tool.app"
           codesign --verify --deep --strict "$app"
+          res="$app/Contents/Resources"
+          PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$res/vendor-arm64" /usr/bin/python3 -c "import reportlab.pdfgen.canvas, PIL.Image"
+          PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$res/vendor-x86_64" arch -x86_64 /usr/bin/python3 -c "import reportlab.pdfgen.canvas, PIL.Image"
           # The app's own launcher, as a person would open it (launch.sh picks the Apple silicon library)
           /usr/bin/python3 tools/smoke_test.py "$app/Contents/MacOS/scout-advancement"
+          # It must have used the bundled library, not downloaded its fallback copy
+          test ! -e "$HOME/Library/Application Support/Scout Advancement Tool/vendor"
           # The Intel copy of the PDF library, run under Rosetta
-          PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$app/Contents/Resources/vendor-x86_64" \
-            arch -x86_64 /usr/bin/python3 tools/smoke_test.py arch -x86_64 /usr/bin/python3 "$app/Contents/Resources/app/server.py"
+          PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$res/vendor-x86_64" \
+            arch -x86_64 /usr/bin/python3 tools/smoke_test.py arch -x86_64 /usr/bin/python3 "$res/app/server.py"
 
       - uses: actions/upload-artifact@v6
         with:
