@@ -1,13 +1,17 @@
 # Builds the Windows version on GitHub's Windows machines: a standalone .exe (Python and the PDF
 # library built in), an installer that adds a Start Menu shortcut, and a portable .zip. Each build
 # is tested end to end with made-up scouts. When a GitHub release is published, the installer and
-# zip are attached to it.
+# zip are attached to it. Run it by hand with a release tag to rebuild that release's downloads.
 name: Windows build
 
 on:
   push:
     paths: ["app/**", "tools/windows/**", "tools/smoke_test.py", ".github/workflows/windows.yml"]
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "To replace a release's downloads, its tag (for example v1.0.0). Leave empty for a test build."
+        required: false
   release:
     types: [published]
 
@@ -19,6 +23,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.release_tag || github.ref }}
 
       - uses: actions/setup-python@v6
         with:
@@ -31,7 +37,9 @@ jobs:
         id: ver
         shell: bash
         run: |
-          if [ "${{ github.event_name }}" = "release" ]; then v="${{ github.event.release.tag_name }}"; else v="dev-${GITHUB_SHA::7}"; fi
+          tag="${{ github.event.release.tag_name || inputs.release_tag }}"
+          if [ -n "$tag" ]; then v="$tag"; else v="dev-${GITHUB_SHA::7}"; fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
           v="${v#v}"
           num="$(echo "$v" | grep -Eo '^[0-9]+(\.[0-9]+){0,3}' || true)"
           echo "version=$v" >> "$GITHUB_OUTPUT"
@@ -70,7 +78,7 @@ jobs:
             dist/*.zip
 
       - name: Attach to the release
-        if: github.event_name == 'release'
+        if: steps.ver.outputs.tag != ''
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "${{ github.event.release.tag_name }}" (Get-ChildItem dist/*.exe, dist/*.zip).FullName --clobber
+        run: gh release upload "${{ steps.ver.outputs.tag }}" (Get-ChildItem dist/*.exe, dist/*.zip).FullName --clobber

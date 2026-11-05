@@ -1,6 +1,7 @@
 # Builds the Mac .dmg on GitHub's Mac machines with tools/build_release.sh, then tests the app
 # inside it end to end with made-up scouts, on both Apple silicon and (through Rosetta) Intel.
-# When a GitHub release is published, the .dmg is attached to it.
+# When a GitHub release is published, the .dmg is attached to it. Run it by hand with a release tag to
+# rebuild that release's .dmg.
 #
 # Mac minutes cost more than Windows ones, so this runs only for releases, by hand from the
 # Actions tab, or when the Mac build files themselves change.
@@ -10,6 +11,10 @@ on:
   push:
     paths: ["tools/build_release.sh", "tools/launcher.c", "tools/make_icon.swift", ".github/workflows/mac.yml"]
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "To replace a release's downloads, its tag (for example v1.0.0). Leave empty for a test build."
+        required: false
   release:
     types: [published]
 
@@ -21,11 +26,15 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.release_tag || github.ref }}
 
       - name: Work out the version
         id: ver
         run: |
-          if [ "${{ github.event_name }}" = "release" ]; then v="${{ github.event.release.tag_name }}"; else v="dev-${GITHUB_SHA::7}"; fi
+          tag="${{ github.event.release.tag_name || inputs.release_tag }}"
+          if [ -n "$tag" ]; then v="$tag"; else v="dev-${GITHUB_SHA::7}"; fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "version=${v#v}" >> "$GITHUB_OUTPUT"
 
       - name: Build the .dmg
@@ -58,7 +67,7 @@ jobs:
           path: dist/*.dmg
 
       - name: Attach to the release
-        if: github.event_name == 'release'
+        if: steps.ver.outputs.tag != ''
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "${{ github.event.release.tag_name }}" dist/*.dmg --clobber
+        run: gh release upload "${{ steps.ver.outputs.tag }}" dist/*.dmg --clobber

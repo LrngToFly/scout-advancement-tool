@@ -4,6 +4,8 @@ A small app for Windows and Mac for planning Scouts BSA advancement from Scout r
 
 The tool runs on your own computer and opens in your web browser. Your scout data stays on your computer.
 
+![The Categorize tab: each requirement's full wording, its category, and which scouts still need it](docs/images/app-screenshot.png)
+
 ## What it does
 
 - **Categorize requirements.** Shows the full official wording of every requirement. You tag each one as:
@@ -21,6 +23,8 @@ The tool runs on your own computer and opens in your web browser. Your scout dat
   - one PDF per scout, to email to the scout and parents
 
   Each report starts at the scout's first unfinished rank. The PDFs show short requirement labels plus a legend; the full wording appears only in the app.
+
+  <img src="docs/images/scout-pdf.png" alt="First page of one scout's PDF report (made-up scout)" width="480">
 
 ## Using the tool
 
@@ -148,7 +152,7 @@ Create and publish a release on GitHub's **Releases** page, with a tag like `v1.
 | [`windows.yml`](.github/workflows/windows.yml) | Windows installer and portable zip | PyInstaller and Inno Setup on GitHub's Windows machines |
 | [`mac.yml`](.github/workflows/mac.yml) | macOS .dmg | `tools/build_release.sh` on GitHub's Mac machines. Tested on Apple silicon and on Intel through Rosetta |
 
-A build that fails its test isn't attached. You can also run either workflow any time from the **Actions** tab (**Run workflow**) and download the result from the run's artifacts. To build the .dmg on your own Mac instead, run `tools/build_release.sh 1.2.0`, which creates `dist/Scout-Advancement-Tool-1.2.0.dmg`.
+A build that fails its test isn't attached. To rebuild an existing release's downloads, run both workflows from the **Actions** tab with **release_tag** set to its tag (for example `v1.0.0`). You can also run either workflow any time from the **Actions** tab (**Run workflow**) and download the result from the run's artifacts. To build the .dmg on your own Mac instead, run `tools/build_release.sh 1.2.0`, which creates `dist/Scout-Advancement-Tool-1.2.0.dmg`.
 
 To test the tool from source on either system, run `python3 tools/smoke_test.py python3 app/server.py`. It uses a temporary data folder and its own port, so it never touches real data or a copy of the tool that's already running.
 
