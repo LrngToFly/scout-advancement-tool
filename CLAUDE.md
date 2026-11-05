@@ -23,6 +23,7 @@ A small local app (Mac, plus a packaged Windows build) for planning Scouts BSA a
 | `tools/launcher.c`, `tools/make_icon.swift` | Native launcher binary and icon generator for that `.app`. |
 | `tools/windows/` | Windows entry point (`launch.py`: log file + message boxes, since the .exe has no console), Inno Setup script (`installer.iss`), and `icon.ico`. |
 | `.github/workflows/windows.yml` | Builds the Windows .exe, installer and portable zip on `windows-latest`, runs `smoke_test.py` against the source and the .exe, and attaches the installer and zip to a GitHub release when it's published. Runs on pushes that touch `app/` or the Windows files, or by hand from the Actions tab. |
+| `.github/workflows/mac.yml` | Runs `build_release.sh` on `macos-latest`, mounts the .dmg, runs `smoke_test.py` through the app's real launcher and the Intel library under Rosetta, and attaches the .dmg to a published release. To save Mac minutes it runs only for releases, by hand, or on pushes that change the Mac build files. |
 | `tools/smoke_test.py` | Starts the tool against a temp data folder on port 8799, loads a made-up CSV, generates every PDF, and quits. |
 | `config.example.json` | Template for the gitignored `config.json` (`data_dir`). |
 
@@ -56,7 +57,7 @@ tools/install_app.sh
 tools/build_release.sh 1.0.0
 ```
 
-`build_release.sh` copies `app/` into the bundle along with per-chip copies of reportlab, Pillow, and chardet (`Contents/Resources/vendor-arm64`, `vendor-x86_64`) built for Python 3.9. It's ad-hoc signed only. Inside the bundle `config.json` is never found, so the bundled app always uses `~/Documents/Scout Advancement Data`. To test the built app with made-up data, run `Contents/MacOS/scout-advancement` with `HOME` set to a temp folder that has a `Documents/` subfolder. Release drafts: `gh release create vX.Y.Z dist/*.dmg --draft`. Never publish without the owner's OK. Publishing the release triggers the Windows workflow, which adds the Windows installer and zip to it a couple of minutes later.
+`build_release.sh` copies `app/` into the bundle along with per-chip copies of reportlab, Pillow, and chardet (`Contents/Resources/vendor-arm64`, `vendor-x86_64`) built for Python 3.9. It's ad-hoc signed only. Inside the bundle `config.json` is never found, so the bundled app always uses `~/Documents/Scout Advancement Data`. To test the built app with made-up data, run `Contents/MacOS/scout-advancement` with `HOME` set to a temp folder that has a `Documents/` subfolder. Releases: `gh release create vX.Y.Z --draft --generate-notes`. No local build is needed: publishing the release triggers both workflows, which test and then attach the .dmg, the Windows installer and the zip a few minutes later. Never publish without the owner's OK.
 
 Stop a running server with the app's **Quit** button or `curl -X POST http://127.0.0.1:8765/api/quit`. If port 8765 is already serving the tool, `server.py` just opens the browser and exits.
 

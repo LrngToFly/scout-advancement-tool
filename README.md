@@ -41,7 +41,9 @@ It uses a small compiled launcher (`tools/launcher.c`) rather than a shell scrip
 
 ### Downloadable app (for other leaders)
 
-`tools/build_release.sh 1.0.0` builds `dist/Scout-Advancement-Tool-1.0.0.dmg`, a stand-alone copy of the app that works without this repo. Attach it to a GitHub Release. The downloaded app keeps its data in `~/Documents/Scout Advancement Data`.
+`tools/build_release.sh 1.0.0` builds `dist/Scout-Advancement-Tool-1.0.0.dmg`, a stand-alone copy of the app that works without this repo. The downloaded app keeps its data in `~/Documents/Scout Advancement Data`.
+
+You don't need to build it yourself for a release. Publishing a GitHub release runs [`.github/workflows/mac.yml`](.github/workflows/mac.yml) on GitHub's Mac machines. It builds the .dmg with the same script and tests the app inside it with made-up scouts, on Apple silicon and on Intel (through Rosetta). Then it attaches the .dmg to the release. You can also run it from the **Actions** tab (**Mac build → Run workflow**).
 
 ## Windows
 
@@ -91,4 +93,4 @@ Requirement text comes from the official Scouts BSA rank requirements (effective
 | `tools/launcher.c`, `tools/make_icon.swift` | The app's launcher and icon |
 | `tools/windows/` | Windows entry point, installer script, and icon |
 | `tools/smoke_test.py` | End-to-end test with made-up scouts |
-| `.github/workflows/windows.yml` | Builds and tests the Windows version |
+| `.github/workflows/windows.yml`, `.github/workflows/mac.yml` | Build and test the Windows and Mac downloads, and attach them to releases |
