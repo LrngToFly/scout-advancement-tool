@@ -62,7 +62,7 @@ jobs:
           if ($LASTEXITCODE) { exit 1 }
           Compress-Archive -Path "dist/Scout Advancement Tool" -DestinationPath "dist/ScoutAdvancementTool-${{ steps.ver.outputs.version }}-Windows-Portable.zip"
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: ScoutAdvancementTool-${{ steps.ver.outputs.version }}-Windows
           path: |
