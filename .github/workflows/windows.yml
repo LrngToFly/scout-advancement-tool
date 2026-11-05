@@ -18,9 +18,9 @@ jobs:
   windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -36,6 +36,9 @@ jobs:
           num="$(echo "$v" | grep -Eo '^[0-9]+(\.[0-9]+){0,3}' || true)"
           echo "version=$v" >> "$GITHUB_OUTPUT"
           echo "num=${num:-0.0.0}" >> "$GITHUB_OUTPUT"
+
+      - name: Check the default data folder
+        run: python -c "import sys; sys.path.insert(0, 'app'); import server; print(server.DATA_ROOT); assert server.DATA_ROOT.parent.is_dir()"
 
       - name: Test from source
         run: python tools/smoke_test.py python app/server.py
@@ -59,7 +62,7 @@ jobs:
           if ($LASTEXITCODE) { exit 1 }
           Compress-Archive -Path "dist/Scout Advancement Tool" -DestinationPath "dist/ScoutAdvancementTool-${{ steps.ver.outputs.version }}-Windows-Portable.zip"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: ScoutAdvancementTool-${{ steps.ver.outputs.version }}-Windows
           path: |
