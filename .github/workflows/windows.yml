@@ -1,0 +1,73 @@
+# Builds the Windows version on GitHub's Windows machines: a standalone .exe (Python and the PDF
+# library built in), an installer that adds a Start Menu shortcut, and a portable .zip. Each build
+# is tested end to end with made-up scouts. When a GitHub release is published, the installer and
+# zip are attached to it.
+name: Windows build
+
+on:
+  push:
+    paths: ["app/**", "tools/windows/**", "tools/smoke_test.py", ".github/workflows/windows.yml"]
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install build tools
+        run: python -m pip install --disable-pip-version-check reportlab==4.2.5 pyinstaller==6.11.1
+
+      - name: Work out the version
+        id: ver
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then v="${{ github.event.release.tag_name }}"; else v="dev-${GITHUB_SHA::7}"; fi
+          v="${v#v}"
+          num="$(echo "$v" | grep -Eo '^[0-9]+(\.[0-9]+){0,3}' || true)"
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "num=${num:-0.0.0}" >> "$GITHUB_OUTPUT"
+
+      - name: Test from source
+        run: python tools/smoke_test.py python app/server.py
+
+      - name: Build the .exe
+        run: >-
+          pyinstaller --noconfirm --windowed --name "Scout Advancement Tool"
+          --icon tools/windows/icon.ico --paths app
+          --add-data "app/index.html;." --add-data "app/requirements.json;."
+          --hidden-import server --hidden-import pdf_report
+          tools/windows/launch.py
+
+      - name: Test the .exe
+        run: python tools/smoke_test.py "dist/Scout Advancement Tool/Scout Advancement Tool.exe"
+
+      - name: Build the installer and portable zip
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress; if ($LASTEXITCODE) { exit 1 } }
+          & $iscc "/DAppVersion=${{ steps.ver.outputs.version }}" "/DAppVersionNum=${{ steps.ver.outputs.num }}" tools/windows/installer.iss
+          if ($LASTEXITCODE) { exit 1 }
+          Compress-Archive -Path "dist/Scout Advancement Tool" -DestinationPath "dist/ScoutAdvancementTool-${{ steps.ver.outputs.version }}-Windows-Portable.zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ScoutAdvancementTool-${{ steps.ver.outputs.version }}-Windows
+          path: |
+            dist/*.exe
+            dist/*.zip
+
+      - name: Attach to the release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" (Get-ChildItem dist/*.exe, dist/*.zip).FullName --clobber

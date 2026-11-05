@@ -39,6 +39,17 @@ Run `tools/install_app.sh` once to build **Scout Advancement Tool.app** in `~/Ap
 
 It uses a small compiled launcher (`tools/launcher.c`) rather than a shell script, so that macOS asks for drive access on behalf of the app instead of silently refusing.
 
+## Windows
+
+Download **`ScoutAdvancementTool-<version>-Windows-Setup.exe`** from the [Releases](../../releases) page and run it. It installs for your Windows account only (no administrator password) and adds **Scout Advancement Tool** to the Start menu. Python and the PDF library are built in, so nothing else is needed. There's also a portable `.zip` that runs without installing.
+
+- The installer isn't code-signed, so the first time Windows may say *"Windows protected your PC."* Click **More info → Run anyway**.
+- The tool runs in the background and opens in your web browser. Click **Quit** in the page to stop it.
+- Data and reports go in `Documents\Scout Advancement Data`. Uninstalling leaves them in place.
+- Problems are logged to `%LOCALAPPDATA%\Scout Advancement Tool\log.txt`.
+
+The Windows version is built from this same code by GitHub Actions ([`.github/workflows/windows.yml`](.github/workflows/windows.yml)), using PyInstaller and Inno Setup. Each build is tested end to end with made-up scouts (`tools/smoke_test.py`). Publishing a GitHub release attaches the installer and zip to it automatically. You can also build one any time from the **Actions** tab (**Windows build → Run workflow**) and download it from the run's artifacts.
+
 ## Where your data lives
 
 Scout data and reports are kept **outside this repo**. The location is set in `config.json`, which git ignores:
@@ -74,3 +85,6 @@ Requirement text comes from the official Scouts BSA rank requirements (effective
 | `app/requirements.json` | Requirement wording, short labels, default categories |
 | `tools/install_app.sh` | Builds the Launchpad app in `~/Applications` |
 | `tools/launcher.c`, `tools/make_icon.swift` | The app's launcher and icon |
+| `tools/windows/` | Windows entry point, installer script, and icon |
+| `tools/smoke_test.py` | End-to-end test with made-up scouts |
+| `.github/workflows/windows.yml` | Builds and tests the Windows version |
