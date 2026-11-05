@@ -50,6 +50,10 @@ To use a different folder, for example a shared or external drive, see [config.j
 
 Requirement text comes from the official Scouts BSA rank requirements (effective Jan. 1, 2024) and the scouting.org Awards Central pages.
 
+### Found a problem or have an idea?
+
+Use the **[Scout Advancement Tool Feedback portal](https://alindeman51.atlassian.net/servicedesk/customer/portal/1)**. Choose **Report a problem** or **Suggest an improvement**. Please don't include scouts' names or attach your CSV file.
+
 ## Windows
 
 ### Install
@@ -104,7 +108,7 @@ git ignores `config.json`. The downloadable Mac app always uses `~/Documents/Sco
 
 ### Bugs and feature requests
 
-Bugs and ideas for improvements are tracked in the Jira space **SAT** ([Scout Advancement Tool board](https://alindeman51.atlassian.net/jira/software/projects/SAT/boards)). Use the **Bug** work type for something that's broken and **Feature** for an improvement or new idea. Each Jira release matches a GitHub release, such as `1.0.0`.
+Requests from the feedback portal arrive in the Jira service space **SUP** ("Scout Advancement Tool Feedback"). Work that's accepted is tracked in the Jira space **SAT** ([Scout Advancement Tool board](https://alindeman51.atlassian.net/jira/software/projects/SAT/boards)). Use the **Bug** work type for something that's broken and **Feature** for an improvement or new idea. Each Jira release matches a GitHub release, such as `1.0.0`.
 
 ### Making a release
 
