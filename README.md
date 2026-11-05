@@ -25,11 +25,40 @@ The tool runs on your own computer and opens in your web browser. Your scout dat
 ## Using the tool
 
 1. Install it and open it. See [Windows](#windows) or [macOS](#macos) below.
-2. The tool opens in your web browser. Click **Load CSV…** and pick a Report Builder export from advancements.scouting.org.
+2. The tool opens in your web browser. Click **Load CSV…** and pick the CSV file you exported from advancements.scouting.org. See [Getting your CSV](#getting-your-csv-from-advancementsscoutingorg) below.
 3. **Tab 1 · Categorize:** check or change how each requirement will be covered.
 4. **Tab 2 · Scout Progress:** see where each scout stands.
 5. **Tab 3 · Generate PDFs:** pick the scouts and reports you want, then click **Generate PDFs**. The new folder of PDFs opens when it's done.
 6. Click **Quit** in the page when you're finished. The tool keeps running in the background until you do. If you close the browser tab instead, opening the tool again brings the page back.
+
+### Getting your CSV from advancements.scouting.org
+
+The tool reads a CSV file exported from **Scoutbook Plus** at [advancements.scouting.org](https://advancements.scouting.org). You set up a custom report once, and then rerun it whenever you want fresh data.
+
+**Set up the report (one time)**
+
+1. Sign in at advancements.scouting.org and click **Reports** in the left menu.
+2. Open the **Custom Reports** tab, then **My Reports**, and click **+ New Report**. This opens Scoutbook's Report Builder.
+3. Under **Settings**, check only **Show Empty Requirements** and leave every other box unchecked. That makes the report list every requirement, even ones no scout has started, so the tool can show what's still left.
+4. Under **Selections**, check the scouts you want to plan for: the whole unit, a patrol, or individual scouts.
+5. Under **Ranks**, check both **Rank Status** and the requirements for each of these four ranks. Leave Star, Life and Eagle unchecked.
+
+   | Rank | Check |
+   | --- | --- |
+   | Scout Rank | Rank Status, Scout Requirements |
+   | Tenderfoot Rank | Rank Status, Tenderfoot Requirements |
+   | Second Class Rank | Rank Status, Second Class Req. |
+   | First Class Rank | Rank Status, First Class Requirements |
+
+6. Under **Awards**, leave **Award Requirements** unchecked. Under **Multi-Program Awards**, check only **Firem'n Chit (Scouts BSA)**, **Totin' Chip**, and **Totin' Chip (2024)**.
+7. Give the report a title (for example, "Trail to First Class") and save it.
+
+**Export the CSV (each time you want fresh data)**
+
+1. Go to **Reports → Custom Reports → My Reports**.
+2. Find your saved report and click its green **Run** button.
+3. On the report page, click the blue **CSV** button. The file downloads, usually to your Downloads folder.
+4. In Scout Advancement Tool, click **Load CSV…** and pick that file. The report title on the PDFs comes from the file name, and you can change it on the **Generate PDFs** tab.
 
 ### Where your data lives
 

@@ -94,7 +94,7 @@ def save_settings(s):
 
 
 def title_from_filename(fn):
-    # ReportBuilder_Troop0004B_Swordsmen_First_Class_20261103.csv -> Troop0004B Swordsmen First Class
+    # ReportBuilder_Troop0123_Trail_to_First_Class_20260101.csv -> Troop0123 Trail to First Class
     stem = re.sub(r"\.csv$", "", fn, flags=re.I)
     stem = re.sub(r"^ReportBuilder_", "", stem, flags=re.I)
     stem = re.sub(r"_\d{8}$", "", stem)

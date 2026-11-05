@@ -73,6 +73,19 @@
   .okbox ul { margin: 6px 0 10px; padding-left: 20px; }
   .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
   .muted { color: var(--muted); }
+  .csvhelp { font-size: 13.5px; }
+  .csvhelp h4 { margin: 14px 0 6px; font-size: 14px; }
+  .csvhelp ol { margin: 0; padding-left: 22px; }
+  .csvhelp li { margin: 4px 0; }
+  .csvhelp table { border-collapse: collapse; margin: 6px 0 2px; font-size: 13px; }
+  .csvhelp td, .csvhelp th { border: 1px solid var(--line); padding: 4px 10px; text-align: left; }
+  .csvhelp th { background: var(--bg); }
+  .csvhelp .run { color: #2E7D32; font-weight: 700; }
+  .csvhelp .csv { color: #1565C0; font-weight: 700; }
+  #helpDlg { border: 0; border-radius: 12px; padding: 0; max-width: 680px; width: calc(100% - 32px); box-shadow: 0 12px 40px rgba(0,0,0,.25); }
+  #helpDlg::backdrop { background: rgba(18,48,90,.35); }
+  #helpDlg .dlgbody { padding: 18px 22px; max-height: 75vh; overflow: auto; }
+  #helpDlg .dlgfoot { padding: 12px 22px; border-top: 1px solid var(--line); text-align: right; }
   #toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: #1d2433; color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity .2s; pointer-events: none; }
   #toast.show { opacity: .95; }
   @media (max-width: 700px) { .req { grid-template-columns: 1fr; } .seg { grid-template-columns: repeat(5, 1fr); } nav { top: 0; position: static; } header { position: static; } }
@@ -85,6 +98,7 @@
     <div class="csvinfo" id="csvinfo">No report loaded</div>
   </div>
   <div class="actions">
+    <button id="helpBtn">How to get the CSV</button>
     <button id="loadBtn">Load CSV…</button>
     <input type="file" id="fileIn" accept=".csv,text/csv" hidden>
     <button id="openReportsBtn">Open Reports Folder</button>
@@ -98,6 +112,11 @@
 </nav>
 <main>
   <div id="globalErr"></div>
+  <div class="card" id="csvHelpCard" hidden>
+    <h3>Start here: get your CSV from advancements.scouting.org</h3>
+    <div class="csvhelp"></div>
+    <p style="margin:12px 0 0"><button class="primary" id="loadBtn2">Load CSV…</button></p>
+  </div>
 
   <section class="tab on" id="tab-reqs">
     <div class="toolbar">
@@ -151,6 +170,37 @@
   </section>
 </main>
 <div id="toast"></div>
+<dialog id="helpDlg">
+  <div class="dlgbody"><h3 style="margin-top:0">How to get the CSV from advancements.scouting.org</h3><div class="csvhelp"></div></div>
+  <div class="dlgfoot"><button class="primary" id="helpClose">Close</button></div>
+</dialog>
+<template id="csvHelpTpl">
+  <p style="margin:0">The tool reads a CSV file exported from <b>Scoutbook Plus</b> at <a href="https://advancements.scouting.org" target="_blank" rel="noopener">advancements.scouting.org</a>. Set up a custom report once, then rerun it whenever you want fresh data.</p>
+  <h4>Set up the report (one time)</h4>
+  <ol>
+    <li>Sign in at advancements.scouting.org and click <b>Reports</b> in the left menu.</li>
+    <li>Open the <b>Custom Reports</b> tab, then <b>My Reports</b>, and click <b>+ New Report</b>.</li>
+    <li>Under <b>Settings</b>, check only <b>Show Empty Requirements</b>. Leave every other box unchecked.</li>
+    <li>Under <b>Selections</b>, check the scouts you want to plan for: the whole unit, a patrol, or individual scouts.</li>
+    <li>Under <b>Ranks</b>, check <b>Rank Status</b> and the requirements for these four ranks. Leave Star, Life and Eagle unchecked.
+      <table>
+        <tr><th>Rank</th><th>Check</th></tr>
+        <tr><td>Scout Rank</td><td>Rank Status, Scout Requirements</td></tr>
+        <tr><td>Tenderfoot Rank</td><td>Rank Status, Tenderfoot Requirements</td></tr>
+        <tr><td>Second Class Rank</td><td>Rank Status, Second Class Req.</td></tr>
+        <tr><td>First Class Rank</td><td>Rank Status, First Class Requirements</td></tr>
+      </table></li>
+    <li>Under <b>Awards</b>, leave <b>Award Requirements</b> unchecked. Under <b>Multi-Program Awards</b>, check only <b>Firem'n Chit (Scouts BSA)</b>, <b>Totin' Chip</b>, and <b>Totin' Chip (2024)</b>.</li>
+    <li>Give the report a title (for example, "Trail to First Class") and save it.</li>
+  </ol>
+  <h4>Export the CSV (each time you want fresh data)</h4>
+  <ol>
+    <li>Go to <b>Reports → Custom Reports → My Reports</b>.</li>
+    <li>Find your saved report and click its green <span class="run">Run</span> button.</li>
+    <li>On the report page, click the blue <span class="csv">CSV</span> button. The file downloads, usually to your Downloads folder.</li>
+    <li>Here, click <b>Load CSV…</b> and pick that file.</li>
+  </ol>
+</template>
 
 <script>
 const CATS = [["D","Discuss"],["O","Outdoor"],["C","Coordinated"],["S","On Own"],["N","N/A"]];
@@ -179,6 +229,7 @@ async function load() {
 
 function render() {
   const c = S.csv;
+  $("#csvHelpCard").hidden = !!c;
   $("#csvinfo").textContent = c ? `Loaded: ${c.filename} · ${c.scouts.length} scouts · loaded ${c.loaded_at}` : "No report loaded. Click Load CSV…";
   renderReqs(); renderScouts(); renderReports();
 }
@@ -326,6 +377,10 @@ document.querySelectorAll("nav button").forEach(b => b.addEventListener("click",
 }));
 
 $("#loadBtn").addEventListener("click", () => $("#fileIn").click());
+$("#loadBtn2").addEventListener("click", () => $("#fileIn").click());
+document.querySelectorAll(".csvhelp").forEach(d => d.append($("#csvHelpTpl").content.cloneNode(true)));
+$("#helpBtn").addEventListener("click", () => $("#helpDlg").showModal());
+$("#helpClose").addEventListener("click", () => $("#helpDlg").close());
 $("#fileIn").addEventListener("change", async e => {
   const f = e.target.files[0]; if (!f) return;
   try { S = await api("/api/upload", { filename: f.name, text: await f.text() }); showErr(""); render(); toast("Loaded " + f.name); }
