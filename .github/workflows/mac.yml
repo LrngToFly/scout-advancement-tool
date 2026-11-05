@@ -1,0 +1,59 @@
+# Builds the Mac .dmg on GitHub's Mac machines with tools/build_release.sh, then tests the app
+# inside it end to end with made-up scouts, on both Apple silicon and (through Rosetta) Intel.
+# When a GitHub release is published, the .dmg is attached to it.
+#
+# Mac minutes cost more than Windows ones, so this runs only for releases, by hand from the
+# Actions tab, or when the Mac build files themselves change.
+name: Mac build
+
+on:
+  push:
+    paths: ["tools/build_release.sh", "tools/launcher.c", "tools/make_icon.swift", ".github/workflows/mac.yml"]
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Work out the version
+        id: ver
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then v="${{ github.event.release.tag_name }}"; else v="dev-${GITHUB_SHA::7}"; fi
+          echo "version=${v#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Build the .dmg
+        run: |
+          /usr/bin/python3 --version
+          tools/build_release.sh "${{ steps.ver.outputs.version }}"
+
+      - name: Test the app inside the .dmg
+        run: |
+          dmg="$(ls dist/*.dmg)"
+          mnt="$(mktemp -d)"
+          hdiutil attach -nobrowse -readonly -mountpoint "$mnt" "$dmg"
+          trap 'hdiutil detach "$mnt" -force' EXIT
+          app="$mnt/Scout Advancement Tool.app"
+          codesign --verify --deep --strict "$app"
+          # The app's own launcher, as a person would open it (launch.sh picks the Apple silicon library)
+          /usr/bin/python3 tools/smoke_test.py "$app/Contents/MacOS/scout-advancement"
+          # The Intel copy of the PDF library, run under Rosetta
+          PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$app/Contents/Resources/vendor-x86_64" \
+            arch -x86_64 /usr/bin/python3 tools/smoke_test.py arch -x86_64 /usr/bin/python3 "$app/Contents/Resources/app/server.py"
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: Scout-Advancement-Tool-${{ steps.ver.outputs.version }}-Mac
+          path: dist/*.dmg
+
+      - name: Attach to the release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" dist/*.dmg --clobber
