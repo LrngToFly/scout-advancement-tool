@@ -60,8 +60,8 @@ def load_settings():
                 s[k].update(v)
             else:
                 s[k] = v
-    if not s["categories"]:  # first run: start from the troop's default categories in requirements.json
-        s["categories"] = advancement.suggestions()
+    if not s["categories"]:  # first run: start from the default categories in requirements.json
+        s["categories"] = advancement.default_categories()
     return s
 
 
@@ -94,7 +94,7 @@ def state():
     return {
         "sections": advancement.SECTIONS,
         "source": advancement.REQUIREMENTS["source"],
-        "suggestions": advancement.suggestions(),
+        "defaults": advancement.default_categories(),
         "settings": settings,
         "csv": None if parsed is None else {
             "filename": meta.get("filename", "current.csv"),

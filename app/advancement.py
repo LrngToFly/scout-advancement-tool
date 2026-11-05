@@ -25,8 +25,8 @@ def all_req_keys():
     return [req_key(s["code"], r["id"]) for s in SECTIONS for r in s["reqs"]]
 
 
-def suggestions():
-    return {req_key(s["code"], r["id"]): r["suggest"] for s in SECTIONS for r in s["reqs"]}
+def default_categories():
+    return {req_key(s["code"], r["id"]): r["default"] for s in SECTIONS for r in s["reqs"]}
 
 
 def section_for(label):

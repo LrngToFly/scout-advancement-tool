@@ -11,7 +11,7 @@ A small Mac app for planning Scouts BSA advancement from Scout rank through Firs
   - **On Own**: the scout works on it at home, then shows or discusses it with an ASM
   - **N/A**: happens through the regular troop program (outings, service, Scoutmaster conference, board of review)
 
-  A new install starts with the troop's default categories (stored as `suggest` in `app/requirements.json`). You can change the tags at any time. Each requirement also shows which scouts still need it.
+  A new install starts with the default categories stored in `app/requirements.json`. You can change the tags at any time. Each requirement also shows which scouts still need it.
 - **Scout progress.** Shows each scout's rank and chit status and how many items they have left in each category.
 - **PDF reports.** Each run creates a folder named with the date and time (for example, `Reports/2026-11-03 16-44-31/`) containing:
   - one all-scouts grid, styled after the advancements.scouting.org report
@@ -71,6 +71,6 @@ Requirement text comes from the official Scouts BSA rank requirements (effective
 | `app/index.html` | The app's interface |
 | `app/advancement.py` | CSV parsing and progress logic |
 | `app/pdf_report.py` | PDF generation |
-| `app/requirements.json` | Requirement wording, short labels, suggested categories |
+| `app/requirements.json` | Requirement wording, short labels, default categories |
 | `tools/install_app.sh` | Builds the Launchpad app in `~/Applications` |
 | `tools/launcher.c`, `tools/make_icon.swift` | The app's launcher and icon |
