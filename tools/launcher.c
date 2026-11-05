@@ -5,10 +5,16 @@
 // silently refuses. This small signed binary runs the launch script as a child process, so
 // macOS asks on behalf of "Scout Advancement Tool" and remembers the answer for this app.
 //
-// The script path is baked in at build time by tools/install_app.sh (-DSCRIPT=…).
+// tools/install_app.sh bakes the script path in at build time (-DSCRIPT=…). Without SCRIPT
+// (the self-contained release build from tools/build_release.sh), it runs the launch.sh in the
+// app's own Contents/Resources, wherever the app was moved.
+#include <libgen.h>
+#include <limits.h>
+#include <mach-o/dyld.h>
 #include <signal.h>
 #include <spawn.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/wait.h>
 
 extern char **environ;
@@ -19,7 +25,19 @@ static void forward(int sig) {
 }
 
 int main(void) {
-    char *args[] = {"/bin/bash", SCRIPT, NULL};
+#ifdef SCRIPT
+    char *script = SCRIPT;
+#else
+    char exe[PATH_MAX], real[PATH_MAX], script[PATH_MAX];
+    uint32_t n = sizeof exe;
+    if (_NSGetExecutablePath(exe, &n) != 0 || !realpath(exe, real)) {
+        fprintf(stderr, "scout-advancement: could not find the app's own location\n");
+        return 1;
+    }
+    // .../Contents/MacOS/scout-advancement -> .../Contents/Resources/launch.sh
+    snprintf(script, sizeof script, "%s/../Resources/launch.sh", dirname(real));
+#endif
+    char *args[] = {"/bin/bash", script, NULL};
     if (posix_spawn(&child, "/bin/bash", NULL, NULL, args, environ) != 0) {
         perror("scout-advancement: could not start the launch script");
         return 1;

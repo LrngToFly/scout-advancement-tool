@@ -39,6 +39,10 @@ Run `tools/install_app.sh` once to build **Scout Advancement Tool.app** in `~/Ap
 
 It uses a small compiled launcher (`tools/launcher.c`) rather than a shell script, so that macOS asks for drive access on behalf of the app instead of silently refusing.
 
+### Downloadable app (for other leaders)
+
+`tools/build_release.sh 1.0.0` builds `dist/Scout-Advancement-Tool-1.0.0.dmg`, a stand-alone copy of the app that works without this repo. Attach it to a GitHub Release. The downloaded app keeps its data in `~/Documents/Scout Advancement Data`.
+
 ## Where your data lives
 
 Scout data and reports are kept **outside this repo**. The location is set in `config.json`, which git ignores:

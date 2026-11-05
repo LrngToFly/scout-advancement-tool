@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/usr/bin/python3 app/server.py:*)",
+      "Bash(python3 app/server.py:*)",
+      "Bash(/usr/bin/python3 -m py_compile:*)",
+      "Bash(python3 -m py_compile:*)",
+      "Bash(/usr/bin/python3 --version)",
+      "Bash(curl -s http://127.0.0.1:8765/:*)",
+      "Bash(curl http://127.0.0.1:8765/:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(gh repo view:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh issue list:*)"
+    ],
+    "deny": [
+      "Read(./config.json)",
+      "Read(./**/*.csv)"
+    ]
+  }
+}
