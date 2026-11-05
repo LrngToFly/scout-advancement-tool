@@ -118,7 +118,7 @@
     <div class="toolbar" style="font-size:13px">
       <span class="muted">Click a category to set it; click it again to clear it. Changes save automatically.</span>
       <span class="spacer"></span>
-      <button id="suggestBtn">Fill uncategorized with suggestions</button>
+      <button id="suggestBtn">Fill uncategorized with defaults</button>
     </div>
     <div id="reqList"></div>
   </section>
@@ -212,7 +212,7 @@ function renderReqs() {
         <div>${label}<span class="short">${esc(r.short)}</span>
           <div class="text">${esc(r.text)}</div>${needHtml}</div>
         <div><div class="seg">${CATS.map(([c,n]) => `<button data-key="${key}" data-c="${c}" class="${cat===c?"on":""}">${n}</button>`).join("")}</div>
-          ${cat ? "" : `<div class="sugg">Suggested: ${CATNAME[r.suggest]}</div>`}</div>
+          ${cat ? "" : `<div class="sugg">Default: ${CATNAME[r.suggest]}</div>`}</div>
       </div>`;
     }
     if (rows) html += `<h2 class="sec">${esc(sec.name)}${sec.kind === "chit" ? " <small>Tracked as a whole; the CSV only shows whether it's earned.</small>" : ""}</h2>${rows}`;
@@ -241,7 +241,7 @@ $("#suggestBtn").addEventListener("click", () => {
   for (const [k,v] of Object.entries(S.suggestions)) if (!S.settings.categories[k]) ch[k] = v;
   const n = Object.keys(ch).length;
   if (!n) return toast("Nothing uncategorized");
-  if (confirm(`Fill ${n} uncategorized requirement(s) with the suggested category? Ones you've already set won't change.`)) setCats(ch);
+  if (confirm(`Fill ${n} uncategorized requirement(s) with the default category? Ones you've already set won't change.`)) setCats(ch);
 });
 
 function rankCell(r) {

@@ -60,6 +60,8 @@ def load_settings():
                 s[k].update(v)
             else:
                 s[k] = v
+    if not s["categories"]:  # first run: start from the troop's default categories in requirements.json
+        s["categories"] = advancement.suggestions()
     return s
 
 
